@@ -4,6 +4,7 @@ import data.BancoDados;
 import model.Emprestimo;
 import model.Livro;
 import repository.OpcaoInvalidaException;
+import java.time.Year;
 
 import java.util.List;
 import java.util.Scanner;
@@ -19,53 +20,87 @@ public class LivroService {
 
     int contador = 0;
 
+    int anoatual = Year.now().getValue();
+
     String situacao;
 
     //CADASTRAR
-    public Livro Register(){
+    public Livro Register() {
         contador++;
-        System.out.println("POR FAVOR DIGITE O TITULO DO LIVRO:");
-        String titulo = scanner.nextLine();
 
-        System.out.println("AGORA DIGITE O AUTOR DO LIVRO:");
-        String autor = scanner.nextLine();
+        String titulo;
+        String autor;
 
-        System.out.println("DIGITE O ANO DO LIVRO:");
-        int ano;
+        // VALIDA TÍTULO E AUTOR
+        while (true) {
+            System.out.println("POR FAVOR DIGITE O TITULO DO LIVRO:");
+            titulo = scanner.nextLine();
 
-        while (true){
-            ano = scanner.nextInt();
-            scanner.nextLine();
-            if (ano > 4){
-                System.out.println("ANO INEXISTENTE");
+            System.out.println("AGORA DIGITE O AUTOR DO LIVRO:");
+            autor = scanner.nextLine();
+
+            if (titulo.trim().isEmpty() || autor.trim().isEmpty()) {
+                System.out.println("TÍTULO E AUTOR NÃO PODEM ESTAR VAZIOS!");
                 continue;
             }
+
             break;
         }
 
-        System.out.println("QUANTOS LIVROS EXISTEM NO ESTOQUE:");
-        int estoque = scanner.nextInt();
-        scanner.nextLine();
+        // VALIDA ANO
+        int ano;
+        while (true) {
+            System.out.println("DIGITE O ANO DO LIVRO:");
 
-        if (titulo.trim().isEmpty() && autor.trim().isEmpty()){
-            throw new OpcaoInvalidaException("O campo não deve ser vazio!");
+            if (!scanner.hasNextInt()) {
+                System.out.println("DIGITE APENAS NÚMEROS!");
+                scanner.nextLine();
+                continue;
+            }
+
+            ano = scanner.nextInt();
+            scanner.nextLine();
+
+            if (ano < 0 || ano > anoatual) {
+                System.out.println("ANO INVÁLIDO!");
+                continue;
+            }
+
+            break;
         }
 
+        // VALIDA ESTOQUE
+        int estoque;
+        while (true) {
+            System.out.println("QUANTOS LIVROS EXISTEM NO ESTOQUE:");
+
+            if (!scanner.hasNextInt()) {
+                System.out.println("DIGITE APENAS NÚMEROS!");
+                scanner.nextLine();
+                continue;
+            }
+
+            estoque = scanner.nextInt();
+            scanner.nextLine();
+
+            if (estoque <= 0) {
+                System.out.println("COLOQUE UM VALOR MAIOR QUE ZERO!");
+                continue;
+            }
+
+            break;
+        }
 
         Livro livro = new Livro(titulo, autor, ano, false, contador, estoque);
 
-        //SALVAR NO BANCO DE DADOS
-
         bancoDados.getLivro().add(livro);
-        System.out.println("Quantidade: " + bancoDados.getLivro().size());
 
-        //MOSTRA A MENSAGEM DE SUCESSO
+        System.out.println("QUANTIDADE DE LIVROS: " + bancoDados.getLivro().size());
         System.out.println("LIVRO CADASTRADO COM SUCESSO!");
 
         return livro;
     }
-
-    //LISTAR
+ //LISTAR
     public void List(){
         System.out.println("Quantidade: " + bancoDados.getLivro().size());
 
